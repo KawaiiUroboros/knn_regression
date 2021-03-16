@@ -1,6 +1,6 @@
 var HEIGHT = 600;
 var WIDTH = 800;
-var PADDING = 30;
+var PADDING = 50;
 function main() {
   var canvas = document.getElementById('canvas');
   canvas.width = WIDTH;
@@ -34,12 +34,12 @@ function main() {
     var neighbors = find_neighbors(p, state.points, state.k, state.metric);
     state.dum_neigh = neighbors;
     var c = majority_vote(neighbors, state.num_classes);
-    c = (c-p[2])*(c-p[2]);
-    state.dummies.push([neigh,c]);
+    c = Math.abs((c - p[2]));
+    state.dummies.push([neigh, c]);
 
   }
 
- 
+
   var ctx = canvas.getContext('2d');
   ctx.height = HEIGHT;
   ctx.width = WIDTH;
@@ -62,7 +62,7 @@ function main() {
     small_step: 3,
     big_step: 10,
     dummies: [],
-    dum_neigh:1
+    dum_neigh: 1
   };
 
   function gen_points() {
@@ -76,27 +76,51 @@ function main() {
     });
   }
   gen_points();
-  for(var i = 1; i< 60; i++){
+  for (var i = 1; i < 61; i++) {
     state.k = i;
-    add_point(k);
-}
+    add_point(i);
+  }
   function redraw(speed) {
-    ctx.fillStyle = "lightgrey";
-    ctx.fillRect(0, 0, WIDTH, HEIGHT);
+    // ctx.fillStyle = "lightgrey";
+    // ctx.fillRect(0, 0, WIDTH, HEIGHT);
     ctx.clearRect(PADDING, PADDING, ctx.width - PADDING * 2, ctx.height - PADDING * 2);
     ctx.strokeStyle = "#333"
     //axe y
+    let yLen = ctx.height - PADDING * 2;
     ctx.beginPath();
     ctx.moveTo(PADDING / 2, PADDING);
     ctx.lineTo(PADDING / 2, ctx.height - PADDING / 2);
     ctx.closePath();
     ctx.stroke();
     //axe x
+    let xLen = ctx.width - PADDING * 2;
     ctx.beginPath();
     ctx.moveTo(PADDING / 2, ctx.height - PADDING / 2);
     ctx.lineTo(ctx.width - PADDING, ctx.height - PADDING / 2);
     ctx.closePath();
     ctx.stroke();
+    //ticks x
+    for (let i = 1, l = 7; i < l; i++) {
+      ctx.beginPath();
+      ctx.moveTo(xLen / (l - 1) * i, ctx.height - PADDING / 2);
+      ctx.lineTo(xLen / (l - 1) * i, ctx.height - PADDING / 2 + 10);
+      ctx.closePath();
+      ctx.stroke();
+
+      ctx.textAlign = 'center'
+      ctx.strokeText(`${10 * i}`, xLen / (l - 1) * i, ctx.height - PADDING / 2 + 20);
+    }
+    //ticks y
+    for (let i = 1, l = 10; i < l; i++) {
+      ctx.beginPath();
+      ctx.moveTo(PADDING / 2, yLen / l * i);
+      ctx.lineTo(PADDING / 2 - 10, yLen / l * i);
+      ctx.closePath();
+      ctx.stroke();
+    }
+    draw_points(ctx, state.dummies)
+
+    ///////////////////
 
     // var step = state.small_step;
     // if (speed === 'fast') step = state.big_step;
@@ -214,11 +238,11 @@ function main() {
 
 
 function get_click_coords(obj, e) {
-  let x = 150+70*Math.random();
+  let x = 150 + 70 * Math.random();
   //age
-  let y = 18+72*Math.random();
-  let c = ((x - 100)+y/10)*.9;
-  return [x, y,c];
+  let y = 18 + 72 * Math.random();
+  let c = ((x - 100) + y / 10) * .9;
+  return [x, y, c];
 }
 
 
@@ -269,14 +293,14 @@ function generate_cluster_points_moonshapes(ctx, num_classes, num_points, std) {
   return points;
 }
 
-function generate_cluster_points_circles(ctx, num_classes, num_points, std) {  
+function generate_cluster_points_circles(ctx, num_classes, num_points, std) {
   let points = [];
   for (let i = 0; i < num_points; i++) {
     //height
-    let x = 150+70*Math.random();
+    let x = 150 + 70 * Math.random();
     //age
-    let y = 18+72*Math.random();
-    let c = ((x - 100)+y/10)*.9;
+    let y = 18 + 72 * Math.random();
+    let c = ((x - 100) + y / 10) * .9;
     points.push([x, y, c]);
   }
 
@@ -305,30 +329,40 @@ function generate_cluster_points_random(ctx, num_classes, num_points, std) {
 
 function draw_points(ctx, points, colors) {
   for (var i = 0; i < points.length; i++) {
-    var x = points[i][0];
-    var y = points[i][1];
-    var c = points[i][2];
+    console.log('x :>> ', points[i][0]);
+    var xK = ((WIDTH - PADDING) - (PADDING)) / 61;
+    var yK = (HEIGHT - PADDING * 2) / 61;
+    var x = points[i][0] * xK;
+    var y = points[i][1] * yK;
+    if(i){
+      var xPrev = points[i - 1][0] * xK;
+      var yPrev = points[i - 1][1] * yK;
+    }
+    // var c = points[i][2];
+    ctx.globalAlpha = 1.0;
+    ctx.fillStyle = 'black';
+    ctx.strokeStyle = "black";
     ctx.beginPath();
-    ctx.globalAlpha = 1.0; 
-    ctx.fillStyle = c!==null ? colors[c]:'black';
+    ctx.moveTo(x, y);
+    ctx.lineTo(xPrev, yPrev);
     ctx.arc(x, y, 5, 0, 2 * Math.PI);
     ctx.fill();
 
-    ctx.strokeStyle = "white";
+    ctx.strokeStyle = "black";
     ctx.stroke();
   }
 }
 function draw_dummies(ctx, points, colors, k, metric, neighbors) {
   draw_points(ctx, points, colors);
-  if(points.length == 0 || neighbors==null)
-  return;
-  makeBound(ctx, points[points.length - 1], points,k, metric, neighbors);
+  if (points.length == 0 || neighbors == null)
+    return;
+  makeBound(ctx, points[points.length - 1], points, k, metric, neighbors);
 }
 function makeBound(ctx, p, points, k, metric, neighbors) {
   // ctx.lineWidth = 1;
   // ctx.strokeStyle = '#003300';
   // ctx.stroke();
-  let npop = neighbors[neighbors.length-1];
+  let npop = neighbors[neighbors.length - 1];
   let radius = metric(npop, p);
   console.log(neighbors);
   if (metric == l2_distance) {
@@ -380,7 +414,7 @@ function find_neighbors(p, points, k, metric) {
 function majority_vote(points, num_classes) {
   let n = 0;
   for (var i = 0; i < points.length; i++) {
-    n+=points[i].c;
+    n += points[i][2];
   }
   n /= points.length;
   return n;
