@@ -1,5 +1,6 @@
 var HEIGHT = 600;
 var WIDTH = 800;
+var PADDING = 30;
 function main() {
   var canvas = document.getElementById('canvas');
   canvas.width = WIDTH;
@@ -80,13 +81,30 @@ function main() {
   gen_points();
 
   function redraw(speed) {
-    var step = state.small_step;
-    if (speed === 'fast') step = state.big_step;
-    ctx.clearRect(0, 0, ctx.width, ctx.height);
-    draw_boundaries(ctx, state, step);
-    draw_points(ctx, state.points, state.colors);
-    if(dragging_point == null)
-      draw_dummies(ctx, state.dummies.slice(-1), state.colors, state.k, state.metric, state.dum_neigh);
+    ctx.fillStyle = "lightgrey";
+    ctx.fillRect(0, 0, WIDTH, HEIGHT);
+    ctx.clearRect(PADDING, PADDING, ctx.width - PADDING * 2, ctx.height - PADDING * 2);
+    ctx.strokeStyle = "#333"
+    //axe y
+    ctx.beginPath();
+    ctx.moveTo(PADDING / 2, PADDING);
+    ctx.lineTo(PADDING / 2, ctx.height - PADDING / 2);
+    ctx.closePath();
+    ctx.stroke();
+    //axe x
+    ctx.beginPath();
+    ctx.moveTo(PADDING / 2, ctx.height - PADDING / 2);
+    ctx.lineTo(ctx.width - PADDING, ctx.height - PADDING / 2);
+    ctx.closePath();
+    ctx.stroke();
+
+    // var step = state.small_step;
+    // if (speed === 'fast') step = state.big_step;
+    // ctx.clearRect(0, 0, ctx.width, ctx.height);
+    // draw_boundaries(ctx, state, step);
+    // draw_points(ctx, state.points, state.colors);
+    // if(dragging_point == null)
+    //   draw_dummies(ctx, state.dummies.slice(-1), state.colors, state.k, state.metric, state.dum_neigh);
   }
   redraw();
 
