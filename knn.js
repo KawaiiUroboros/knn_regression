@@ -4,10 +4,7 @@ function main() {
   var canvas = document.getElementById('canvas');
   canvas.width = WIDTH;
   canvas.height = HEIGHT;
-  $(canvas).on('click', (e) => {
-    add_point(e);
-  });
-  function add_point(e) {
+  function add_point(neigh) {
     //let color = ctx.getImageData(e.clientX - canvas.offsetLeft,  e.clientY, 1, 1).data;
     // color = Array.from(color);
     // color.splice(color.length - 1, 1);
@@ -32,16 +29,16 @@ function main() {
     //  redraw();
     //var ctx = canvas.getContext('2d');
     // ctx.beginPath();
-    var p = get_click_coords(canvas, e);
+    var p = get_click_coords(canvas);
     var neighbors = find_neighbors(p, state.points, state.k, state.metric);
     state.dum_neigh = neighbors;
     var c = majority_vote(neighbors, state.num_classes);
-    p.push(c);
-    state.dummies.push(p);
-    redraw();
+    c = (c-p[2])*(c-p[2]);
+    state.dummies.push([neigh,c]);
 
   }
 
+ 
   var ctx = canvas.getContext('2d');
   ctx.height = HEIGHT;
   ctx.width = WIDTH;
@@ -78,7 +75,10 @@ function main() {
     });
   }
   gen_points();
-
+  for(var i = 1; i< 60; i++){
+    state.k = i;
+    add_point(k);
+}
   function redraw(speed) {
     var step = state.small_step;
     if (speed === 'fast') step = state.big_step;
@@ -196,10 +196,11 @@ function main() {
 
 
 function get_click_coords(obj, e) {
-  var offset = $(obj).offset();
-  var cx = e.clientX + document.body.scrollLeft + document.documentElement.scrollLeft - Math.floor(offset.left);
-  var cy = e.clientY + document.body.scrollTop + document.documentElement.scrollTop - Math.floor(offset.top) + 1;
-  return [cx, cy];
+  let x = 150+70*Math.random();
+  //age
+  let y = 18+72*Math.random();
+  let c = ((x - 100)+y/10)*.9;
+  return [x, y,c];
 }
 
 
