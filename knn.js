@@ -77,10 +77,11 @@ function main() {
   gen_points();
   redraw();
   draw_points(ctx, state.points, state.num_points);
-  // for (var i = 1; i < state.num_points; i++) {
-  //   state.k = i;
-  //   add_point(i);
-  // }
+  for (var i = 1; i < state.num_points; i++) {
+    state.k = i;
+    add_point(i);
+  }
+  
   function redraw(speed) {
     // ctx.fillStyle = "lightgrey";
     // ctx.fillRect(0, 0, WIDTH, HEIGHT);
