@@ -50,7 +50,7 @@ function main() {
 
   var state = {
     num_classes: 7,
-    num_points: 100,
+    num_points: 36,
     cluster_std: 50,
     metric: l2_distance,
     dataset: generate_sin,
@@ -75,10 +75,12 @@ function main() {
     });
   }
   gen_points();
-  for (var i = 1; i < state.num_points; i++) {
-    state.k = i;
-    add_point(i);
-  }
+  redraw();
+  draw_points(ctx, state.points, state.num_points);
+  // for (var i = 1; i < state.num_points; i++) {
+  //   state.k = i;
+  //   add_point(i);
+  // }
   function redraw(speed) {
     // ctx.fillStyle = "lightgrey";
     // ctx.fillRect(0, 0, WIDTH, HEIGHT);
@@ -117,8 +119,8 @@ function main() {
       ctx.closePath();
       ctx.stroke();
     }
-    draw_points(ctx, state.dummies, state.num_points)
-
+    // draw_points(ctx, state.dummies, state.num_points)
+    console.log('object :>> ', xLen, yLen);
     ///////////////////
 
     // var step = state.small_step;
@@ -129,7 +131,6 @@ function main() {
     // if(dragging_point == null)
     //   draw_dummies(ctx, state.dummies.slice(-1), state.colors, state.k, state.metric, state.dum_neigh);
   }
-  redraw();
 
   // Handlers for metric buttons
   $('#l2-btn').click(function () {
@@ -255,8 +256,8 @@ function randn() {
 function generate_sin(ctx, num_classes, num_points) {
   var points = [];
   for (var i = 0; i < num_points; i++) {
-    var x = Math.floor(1 + Math.random() * 6);
-    var y = Math.floor(Math.sin(x));
+    var x = 2 * Math.random() * Math.PI;
+    var y = Math.sin(x) + Math.floor(Math.random() + 0.15) ?? Math.random();
     // console.log('x, y :>> ', x, y);
     points.push([x, y]);
   }
@@ -265,17 +266,17 @@ function generate_sin(ctx, num_classes, num_points) {
 
 function draw_points(ctx, points, q) {
   for (var i = 0; i < points.length; i++) {
-    var xK = (x, _q) => {
-      return Math.floor(PADDING + (WIDTH - PADDING * 2) / x)
-    };
-    var yK = (y, _q) => {
-      return Math.floor(PADDING + (HEIGHT - PADDING * 2) / y)
-    };
-    var x = xK(points[i][0], q);
-    var y = yK(points[i][1], q);
-    console.log('x, y :>> ', x, y, x < PADDING || x > WIDTH - PADDING, y < PADDING || y > WIDTH - PADDING);
-    // var x = points[i][0];
-    // var y = points[i][1];
+    // var xK = (x, _q) => {
+    //   return Math.floor(PADDING + (WIDTH - PADDING * 2) / x)
+    // };
+    // var yK = (y, _q) => {
+    //   return Math.floor(PADDING + (HEIGHT - PADDING * 2) / y)
+    // };
+    // var x = xK(points[i][0], q);
+    // var y = yK(points[i][1], q);
+    var x = 50 + points[i][0] * 100;
+    var y = 250+ points[i][1] * 100;
+    console.log('x, y :>> ', x, y);
     ctx.globalAlpha = 1.0;
     ctx.fillStyle = 'black';
     ctx.strokeStyle = "black";
