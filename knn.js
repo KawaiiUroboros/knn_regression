@@ -10,7 +10,6 @@ function main() {
     // color = Array.from(color);
     // color.splice(color.length - 1, 1);
     // color = color.join(' ');
-    // console.log('color :>> ', color);
     //let c;
     // 'orange', 'blue', 'green', 'purple',
     // switch(color){
@@ -34,7 +33,7 @@ function main() {
     var neighbors = find_neighbors(p, state.points, state.k, state.metric);
     state.dum_neigh = neighbors;
     var c = majority_vote(neighbors, state.num_classes);
-    c = Math.abs((c - p[2]));
+    c = Math.abs((c - p[1]));
     state.dummies.push([neigh, c]);
 
   }
@@ -51,10 +50,10 @@ function main() {
 
   var state = {
     num_classes: 7,
-    num_points: 60,
+    num_points: 100,
     cluster_std: 50,
     metric: l2_distance,
-    dataset: generate_cluster_points_circles,
+    dataset: generate_sin,
     k: 1,
     colors: [
       'red', 'blue', 'green', 'purple', 'orange',
@@ -76,7 +75,7 @@ function main() {
     });
   }
   gen_points();
-  for (var i = 1; i < 61; i++) {
+  for (var i = 1; i < state.num_points; i++) {
     state.k = i;
     add_point(i);
   }
@@ -108,17 +107,17 @@ function main() {
       ctx.stroke();
 
       ctx.textAlign = 'center'
-      ctx.strokeText(`${10 * i}`, xLen / (l - 1) * i, ctx.height - PADDING / 2 + 20);
+      ctx.strokeText(`${1 * i}`, xLen / (l - 1) * i, ctx.height - PADDING / 2 + 20);
     }
     //ticks y
     for (let i = 1, l = 10; i < l; i++) {
       ctx.beginPath();
-      ctx.moveTo(PADDING / 2, yLen / l * i);
-      ctx.lineTo(PADDING / 2 - 10, yLen / l * i);
+      ctx.moveTo(PADDING / 2, PADDING + yLen / l * i);
+      ctx.lineTo(PADDING / 2 - 10, PADDING + yLen / l * i);
       ctx.closePath();
       ctx.stroke();
     }
-    draw_points(ctx, state.dummies)
+    draw_points(ctx, state.dummies, state.num_points)
 
     ///////////////////
 
@@ -191,9 +190,7 @@ function main() {
     (function () {
       var num_points = num_points_choices[i];
       var s = '#num-pts-' + num_points + '-btn';
-      console.log(s);
       $('#num-pts-' + num_points + '-btn').click(function () {
-        console.log('here');
         state.num_points = num_points;
         gen_points();
         state.dummies = [];
@@ -220,7 +217,6 @@ function main() {
     dragging_point = idx;
   });
   $(canvas).mousemove(function (e) {
-    //console.log(dragging_point);
     if (dragging_point === null) return;
     var p = get_click_coords(canvas, e);
     state.points[dragging_point][0] = p[0];
@@ -228,7 +224,6 @@ function main() {
     redraw('fast');
   });
   $(canvas).mouseup(function () {
-    //console.log(dragging_point);
     if (dragging_point === null) return;
     dragging_point = null;
     redraw();
@@ -257,95 +252,37 @@ function randn() {
 }
 
 
-function generate_uniform_points(ctx, num_classes, num_points) {
-  // Returns a list of [x, y, class]
+function generate_sin(ctx, num_classes, num_points) {
   var points = [];
   for (var i = 0; i < num_points; i++) {
-    var x = ctx.width * Math.random();
-    var y = ctx.height * Math.random();
-    var c = Math.floor(num_classes * Math.random());
-    points.push([x, y, c]);
+    var x = Math.floor(1 + Math.random() * 6);
+    var y = Math.floor(Math.sin(x));
+    // console.log('x, y :>> ', x, y);
+    points.push([x, y]);
   }
   return points;
 }
 
-function generate_cluster_points_moonshapes(ctx, num_classes, num_points, std) {
-  let shift = 150;
-  let center = WIDTH / num_classes - shift / num_classes;
-
-  var centers = [];
-  for (let i = 0; i < num_classes; i++) {
-    let x = center + shift * i;
-    let y = HEIGHT / 2;
-    centers.push([x, y]);
-  }
-
-  let points = [];
-  for (let i = 0; i < num_points; i++) {
-    let c = Math.floor(num_classes * Math.random());
-    let nboo = c % 2 == 0 ? -1 : 1;
-    let pi = (nboo * Math.random() * Math.PI);
-    let x = Math.cos(pi) * 100 + centers[c][0];
-    let y = Math.sin(pi) * 100 + centers[c][1];
-    points.push([x, y, c]);
-  }
-
-  return points;
-}
-
-function generate_cluster_points_circles(ctx, num_classes, num_points, std) {
-  let points = [];
-  for (let i = 0; i < num_points; i++) {
-    //height
-    let x = 150 + 70 * Math.random();
-    //age
-    let y = 18 + 72 * Math.random();
-    let c = ((x - 100) + y / 10) * .9;
-    points.push([x, y, c]);
-  }
-
-  return points;
-}
-
-function generate_cluster_points_random(ctx, num_classes, num_points, std) {
-  // First generate random cluster centers
-  var centers = [];
-  for (var c = 0; c < num_classes; c++) {
-    var x = ctx.width * Math.random();
-    var y = ctx.height * Math.random();
-    centers.push([x, y]);
-  }
-
-  // Now generate points near cluster centers
-  var points = [];
-  for (var i = 0; i < num_points; i++) {
-    var c = Math.floor(num_classes * Math.random());
-    var x = centers[c][0] + std * randn();
-    var y = centers[c][1] + std * randn();
-    points.push([x, y, c]);
-  }
-  return points;
-}
-
-function draw_points(ctx, points, colors) {
+function draw_points(ctx, points, q) {
   for (var i = 0; i < points.length; i++) {
-    console.log('x :>> ', points[i][0]);
-    var xK = ((WIDTH - PADDING) - (PADDING)) / 61;
-    var yK = (HEIGHT - PADDING * 2) / 61;
-    var x = points[i][0] * xK;
-    var y = points[i][1] * yK;
-    if(i){
-      var xPrev = points[i - 1][0] * xK;
-      var yPrev = points[i - 1][1] * yK;
-    }
-    // var c = points[i][2];
+    var xK = (x, _q) => {
+      return Math.floor(PADDING + (WIDTH - PADDING * 2) / x)
+    };
+    var yK = (y, _q) => {
+      return Math.floor(PADDING + (HEIGHT - PADDING * 2) / y)
+    };
+    var x = xK(points[i][0], q);
+    var y = yK(points[i][1], q);
+    console.log('x, y :>> ', x, y, x < PADDING || x > WIDTH - PADDING, y < PADDING || y > WIDTH - PADDING);
+    // var x = points[i][0];
+    // var y = points[i][1];
     ctx.globalAlpha = 1.0;
     ctx.fillStyle = 'black';
     ctx.strokeStyle = "black";
     ctx.beginPath();
-    ctx.moveTo(x, y);
-    ctx.lineTo(xPrev, yPrev);
-    ctx.arc(x, y, 5, 0, 2 * Math.PI);
+    // ctx.moveTo(x, y);
+    // ctx.lineTo(xPrev, yPrev);
+    ctx.arc(x, y, 3, 0, 2 * Math.PI);
     ctx.fill();
 
     ctx.strokeStyle = "black";
@@ -364,11 +301,9 @@ function makeBound(ctx, p, points, k, metric, neighbors) {
   // ctx.stroke();
   let npop = neighbors[neighbors.length - 1];
   let radius = metric(npop, p);
-  console.log(neighbors);
   if (metric == l2_distance) {
     ctx.beginPath();
     ctx.arc(p[0], p[1], radius, 0, 2 * Math.PI);
-    console.log(p)
   }
   else if (metric == l1_distance)
     ctx.diamond(p[0], p[1], radius, radius);
@@ -414,7 +349,7 @@ function find_neighbors(p, points, k, metric) {
 function majority_vote(points, num_classes) {
   let n = 0;
   for (var i = 0; i < points.length; i++) {
-    n += points[i][2];
+    n += points[i][0];
   }
   n /= points.length;
   return n;
