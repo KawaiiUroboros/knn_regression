@@ -5,13 +5,12 @@ function main() {
   var canvas = document.getElementById('canvas');
   canvas.width = WIDTH;
   canvas.height = HEIGHT;
-  function add_point(neigh) {
+  function add_point(i) {
     var p = get_click_coords(canvas);
-    var neighbors = find_neighbors(p, state.points, state.k, state.metric);
-    state.dum_neigh = neighbors;
+    var neighbors = find_neighbors(p, state.dum_x, state.k, state.metric);
     var c = majority_vote(neighbors, state.num_classes);
     c = Math.abs((c - p[1]));
-    state.dummies.push([neigh, c]);
+    state.dummies.push([i, c]);
 
   }
 
@@ -38,6 +37,7 @@ function main() {
     small_step: 3,
     big_step: 10,
     dummies: [],
+    dum_x:[],
     dum_neigh: 1
   };
 
@@ -55,7 +55,6 @@ function main() {
   redraw();
   draw_points(ctx, state.points, 'yellow');
   for (var i = 1; i < state.num_points; i++) {
-    state.k = i;
     add_point(i);
   }
   draw_points(ctx, state.dummies, 'orange');
@@ -233,14 +232,18 @@ function randn() {
 
 function generate_sin(ctx, num_classes, num_points) {
   var points = [];
-  for (var i = 0; i < num_points; i++) {
+  for (var i = 0; i < num_points*2; i++) {
     var x = 2 * Math.random() * Math.PI;
     var y = Math.sin(x);
     x *= ((ctx.width - PADDING * 2) / 6);
     y *= ((ctx.height - PADDING * 2) / 9);
     // Math.floor(Math.random() + 0.15) ?? Math.random() * 100;
     // console.log('x, y :>> ', x, y);
+    if(i%2==0)
     points.push([x, y]);
+    else
+    dum_x.push([x,y]);
+
   }
   return points;
 }
