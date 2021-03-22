@@ -6,29 +6,6 @@ function main() {
   canvas.width = WIDTH;
   canvas.height = HEIGHT;
   function add_point(neigh) {
-    //let color = ctx.getImageData(e.clientX - canvas.offsetLeft,  e.clientY, 1, 1).data;
-    // color = Array.from(color);
-    // color.splice(color.length - 1, 1);
-    // color = color.join(' ');
-    //let c;
-    // 'orange', 'blue', 'green', 'purple',
-    // switch(color){
-    //   case '128 0 128': // -фиолетовый
-    //   c = 3;
-    //   break;
-    //   case '0 0 255': //   -синий
-    //   c = 1;
-    //   break;
-    //   case '255 165 0': // -желтый
-    //   c = 0;
-    //   break;
-    //   case '0 128 0': // -зеленый
-    //   c = 2;
-    //   break;
-    // }
-    //  redraw();
-    //var ctx = canvas.getContext('2d');
-    // ctx.beginPath();
     var p = get_click_coords(canvas);
     var neighbors = find_neighbors(p, state.points, state.k, state.metric);
     state.dum_neigh = neighbors;
@@ -76,12 +53,13 @@ function main() {
   }
   gen_points();
   redraw();
-  draw_points(ctx, state.points, state.num_points);
+  draw_points(ctx, state.points, 'yellow');
   for (var i = 1; i < state.num_points; i++) {
     state.k = i;
     add_point(i);
   }
-  
+  draw_points(ctx, state.dummies, 'orange');
+
   function redraw(speed) {
     // ctx.fillStyle = "lightgrey";
     // ctx.fillRect(0, 0, WIDTH, HEIGHT);
@@ -121,7 +99,6 @@ function main() {
       ctx.stroke();
     }
     // draw_points(ctx, state.dummies, state.num_points)
-    console.log('object :>> ', xLen, yLen);
     ///////////////////
 
     // var step = state.small_step;
@@ -202,34 +179,34 @@ function main() {
   }
 
   var dragging_point = null;
-  $(canvas).mousedown(function (e) {
-    var p = get_click_coords(canvas, e);
-    var thresh = 10;
-    var idx = null;
-    var min_dist = 100000;
-    for (var i = 0; i < state.num_points; i++) {
-      var dx = (p[0] - state.points[i][0]);
-      var dy = (p[1] - state.points[i][1]);
-      var d = Math.sqrt(dx * dx + dy * dy);
-      if (d < thresh && d < min_dist) {
-        min_dist = d;
-        idx = i;
-      }
-    }
-    dragging_point = idx;
-  });
-  $(canvas).mousemove(function (e) {
-    if (dragging_point === null) return;
-    var p = get_click_coords(canvas, e);
-    state.points[dragging_point][0] = p[0];
-    state.points[dragging_point][1] = p[1];
-    redraw('fast');
-  });
-  $(canvas).mouseup(function () {
-    if (dragging_point === null) return;
-    dragging_point = null;
-    redraw();
-  })
+  // $(canvas).mousedown(function (e) {
+  //   var p = get_click_coords(canvas, e);
+  //   var thresh = 10;
+  //   var idx = null;
+  //   var min_dist = 100000;
+  //   for (var i = 0; i < state.num_points; i++) {
+  //     var dx = (p[0] - state.points[i][0]);
+  //     var dy = (p[1] - state.points[i][1]);
+  //     var d = Math.sqrt(dx * dx + dy * dy);
+  //     if (d < thresh && d < min_dist) {
+  //       min_dist = d;
+  //       idx = i;
+  //     }
+  //   }
+  //   dragging_point = idx;
+  // });
+  // $(canvas).mousemove(function (e) {
+  //   if (dragging_point === null) return;
+  //   var p = get_click_coords(canvas, e);
+  //   state.points[dragging_point][0] = p[0];
+  //   state.points[dragging_point][1] = p[1];
+  //   redraw('fast');
+  // });
+  // $(canvas).mouseup(function () {
+  //   if (dragging_point === null) return;
+  //   dragging_point = null;
+  //   redraw();
+  // })
 
 }
 
@@ -258,14 +235,18 @@ function generate_sin(ctx, num_classes, num_points) {
   var points = [];
   for (var i = 0; i < num_points; i++) {
     var x = 2 * Math.random() * Math.PI;
-    var y = Math.sin(x) + Math.floor(Math.random() + 0.15) ?? Math.random();
+    var y = Math.sin(x);
+    x *= ((ctx.width - PADDING * 2) / 6);
+    y *= ((ctx.height - PADDING * 2) / 9);
+    // Math.floor(Math.random() + 0.15) ?? Math.random() * 100;
     // console.log('x, y :>> ', x, y);
     points.push([x, y]);
   }
   return points;
 }
 
-function draw_points(ctx, points, q) {
+function draw_points(ctx, points, col) {
+  let qe = [];
   for (var i = 0; i < points.length; i++) {
     // var xK = (x, _q) => {
     //   return Math.floor(PADDING + (WIDTH - PADDING * 2) / x)
@@ -275,11 +256,13 @@ function draw_points(ctx, points, q) {
     // };
     // var x = xK(points[i][0], q);
     // var y = yK(points[i][1], q);
-    var x = 50 + points[i][0] * 100;
-    var y = 250+ points[i][1] * 100;
-    console.log('x, y :>> ', x, y);
+    var x = 50 + points[i][0];
+    var y = 250+ points[i][1];
+
+    (qe).push(x);
+
     ctx.globalAlpha = 1.0;
-    ctx.fillStyle = 'black';
+    ctx.fillStyle = col;
     ctx.strokeStyle = "black";
     ctx.beginPath();
     // ctx.moveTo(x, y);
@@ -290,6 +273,7 @@ function draw_points(ctx, points, q) {
     ctx.strokeStyle = "black";
     ctx.stroke();
   }
+  console.log(col, qe)
 }
 function draw_dummies(ctx, points, colors, k, metric, neighbors) {
   draw_points(ctx, points, colors);
