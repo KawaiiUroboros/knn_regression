@@ -7,8 +7,7 @@ function main() {
   canvas.height = HEIGHT;
   function add_point(i) {
     var p = i;
-    var neighbors = find_neighbors(p, state.points , state.k, state.metric);
-    console.log(neighbors,"mew",i);
+    var neighbors = find_neighbors(p, state.points, state.k, state.metric);
     var c = majority_vote(neighbors, state.num_classes);
     state.dummies.push([i, c]);
   }
@@ -35,12 +34,12 @@ function main() {
     small_step: 3,
     big_step: 10,
     dummies: [],
-    dum_x:[],
+    dum_x: [],
     dum_neigh: 1
   };
 
   function gen_points() {
-    state.points = state.dataset(ctx, state.num_classes, state.num_points, state.cluster_std,state.dum_x);
+    state.points = state.dataset(ctx, state.num_classes, state.num_points, state.cluster_std, state.dum_x);
     let cls = [0, 0, 0, 0];
     state.points.forEach(item => {
       $(`.cls-num-${item[2]} span`).text((i, _str) => {
@@ -174,37 +173,6 @@ function main() {
       });
     })();
   }
-
-  var dragging_point = null;
-  // $(canvas).mousedown(function (e) {
-  //   var p = get_click_coords(canvas, e);
-  //   var thresh = 10;
-  //   var idx = null;
-  //   var min_dist = 100000;
-  //   for (var i = 0; i < state.num_points; i++) {
-  //     var dx = (p[0] - state.points[i][0]);
-  //     var dy = (p[1] - state.points[i][1]);
-  //     var d = Math.sqrt(dx * dx + dy * dy);
-  //     if (d < thresh && d < min_dist) {
-  //       min_dist = d;
-  //       idx = i;
-  //     }
-  //   }
-  //   dragging_point = idx;
-  // });
-  // $(canvas).mousemove(function (e) {
-  //   if (dragging_point === null) return;
-  //   var p = get_click_coords(canvas, e);
-  //   state.points[dragging_point][0] = p[0];
-  //   state.points[dragging_point][1] = p[1];
-  //   redraw('fast');
-  // });
-  // $(canvas).mouseup(function () {
-  //   if (dragging_point === null) return;
-  //   dragging_point = null;
-  //   redraw();
-  // })
-
 }
 
 
@@ -228,26 +196,26 @@ function randn() {
 }
 
 
-function generate_sin(ctx, num_classes, num_points,b,dum_x) {
+function generate_sin(ctx, num_classes, num_points, b, dum_x) {
   var points = [];
-  for (var i = 0; i < num_points*2; i++) {
+  for (var i = 0; i < num_points * 2; i++) {
     var x = 2 * Math.random() * Math.PI;
     var y = Math.sin(x);
     x *= ((ctx.width - PADDING * 2) / 6);
     y *= ((ctx.height - PADDING * 2) / 9);
     // Math.floor(Math.random() + 0.15) ?? Math.random() * 100;
-    // console.log('x, y :>> ', x, y);
-    if(i%2==0)
-    points.push([x, y]);
+    if (i % 2 == 0)
+      points.push([x, y]);
     else
-    dum_x.push(x);
+      dum_x.push(x);
 
   }
   return points;
 }
 
 function draw_points(ctx, points, col) {
-  let qe = [];
+  points.sort(function (a, b) { return a[0] - b[0] });
+  var x2, y2;
   for (var i = 0; i < points.length; i++) {
     // var xK = (x, _q) => {
     //   return Math.floor(PADDING + (WIDTH - PADDING * 2) / x)
@@ -258,23 +226,32 @@ function draw_points(ctx, points, col) {
     // var x = xK(points[i][0], q);
     // var y = yK(points[i][1], q);
     var x = 50 + points[i][0];
-    var y = 250+ points[i][1];
-
-    (qe).push(x);
+    var y = 250 + points[i][1];
 
     ctx.globalAlpha = 1.0;
     ctx.fillStyle = col;
-    ctx.strokeStyle = "black";
-    ctx.beginPath();
-    // ctx.moveTo(x, y);
-    // ctx.lineTo(xPrev, yPrev);
-    ctx.arc(x, y, 3, 0, 2 * Math.PI);
-    ctx.fill();
-
-    ctx.strokeStyle = "black";
-    ctx.stroke();
+    // ctx.beginPath();
+    ctx.lineWidth = 3;
+    if(col == "orange"){
+      ctx.beginPath();
+      ctx.moveTo(x2, y2);
+      ctx.lineTo(x, y);
+      ctx.strokeStyle = col;
+      ctx.stroke();
+      ctx.closePath();
+    }
+    if(col == "yellow") {
+      ctx.beginPath();
+      ctx.arc(x, y, 3, 0, 2 * Math.PI)
+      ctx.closePath();
+      ctx.strokeStyle = 'black';
+      ctx.stroke();
+      ctx.fill();
+    };
+    x2 = x;
+    y2 = y;
+    // ctx.closePath();
   }
-  console.log(col, qe)
 }
 function draw_dummies(ctx, points, colors, k, metric, neighbors) {
   draw_points(ctx, points, colors);
@@ -320,11 +297,10 @@ function find_neighbors(p, points, k, metric) {
   var dists = [];
   for (var i = 0; i < points.length; i++) {
     var dist = metric(p, points[i]);
-    //console.log(dist,"v");
     dists.push([dist, points[i]]);
   }
   dists.sort(function (a, b) { return a[0] - b[0] });
-  
+
   var neighbors = [];
   for (var i = 0; i < k && i < dists.length; i++) {
     neighbors.push(dists[i][1][1]);
@@ -336,9 +312,7 @@ function majority_vote(points, num_classes) {
   for (var i = 0; i < points.length; i++) {
     n += points[i];
   }
-  console.log(n,"n");
   n /= points.length;
-  console.log(n);
   return n;
 }
 function draw_boundaries(ctx, state, step) {
