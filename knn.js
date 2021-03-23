@@ -6,14 +6,12 @@ function main() {
   canvas.width = WIDTH;
   canvas.height = HEIGHT;
   function add_point(i) {
-    var p = get_click_coords(canvas);
-    var neighbors = find_neighbors(p, state.dum_x, state.k, state.metric);
+    var p = i;
+    var neighbors = find_neighbors(p, state.points , state.k, state.metric);
+    console.log(neighbors,"mew",i);
     var c = majority_vote(neighbors, state.num_classes);
-    c = Math.abs((c - p[1]));
     state.dummies.push([i, c]);
-
   }
-
 
   var ctx = canvas.getContext('2d');
   ctx.height = HEIGHT;
@@ -30,7 +28,7 @@ function main() {
     cluster_std: 50,
     metric: l2_distance,
     dataset: generate_sin,
-    k: 1,
+    k: 20,
     colors: [
       'red', 'blue', 'green', 'purple', 'orange',
     ],
@@ -42,7 +40,7 @@ function main() {
   };
 
   function gen_points() {
-    state.points = state.dataset(ctx, state.num_classes, state.num_points, state.cluster_std);
+    state.points = state.dataset(ctx, state.num_classes, state.num_points, state.cluster_std,state.dum_x);
     let cls = [0, 0, 0, 0];
     state.points.forEach(item => {
       $(`.cls-num-${item[2]} span`).text((i, _str) => {
@@ -55,7 +53,7 @@ function main() {
   redraw();
   draw_points(ctx, state.points, 'yellow');
   for (var i = 1; i < state.num_points; i++) {
-    add_point(i);
+    add_point(state.dum_x[i]);
   }
   draw_points(ctx, state.dummies, 'orange');
 
@@ -230,7 +228,7 @@ function randn() {
 }
 
 
-function generate_sin(ctx, num_classes, num_points) {
+function generate_sin(ctx, num_classes, num_points,b,dum_x) {
   var points = [];
   for (var i = 0; i < num_points*2; i++) {
     var x = 2 * Math.random() * Math.PI;
@@ -242,7 +240,7 @@ function generate_sin(ctx, num_classes, num_points) {
     if(i%2==0)
     points.push([x, y]);
     else
-    dum_x.push([x,y]);
+    dum_x.push(x);
 
   }
   return points;
@@ -301,10 +299,8 @@ function makeBound(ctx, p, points, k, metric, neighbors) {
 }
 
 function l2_distance(p1, p2) {
-  var dx = p1[0] - p2[0];
-  var dy = p1[1] - p2[1];
-
-  return Math.sqrt(dx * dx + dy * dy);
+  var dx = p1 - p2[0];
+  return Math.sqrt(dx * dx);
 }
 
 
@@ -324,27 +320,27 @@ function find_neighbors(p, points, k, metric) {
   var dists = [];
   for (var i = 0; i < points.length; i++) {
     var dist = metric(p, points[i]);
+    //console.log(dist,"v");
     dists.push([dist, points[i]]);
   }
   dists.sort(function (a, b) { return a[0] - b[0] });
+  
   var neighbors = [];
   for (var i = 0; i < k && i < dists.length; i++) {
-    neighbors.push(dists[i][1]);
+    neighbors.push(dists[i][1][1]);
   }
   return neighbors;
 }
-
-
 function majority_vote(points, num_classes) {
   let n = 0;
   for (var i = 0; i < points.length; i++) {
-    n += points[i][0];
+    n += points[i];
   }
+  console.log(n,"n");
   n /= points.length;
+  console.log(n);
   return n;
 }
-
-
 function draw_boundaries(ctx, state, step) {
   var eps = 0;
   for (var x = step / 2; x < ctx.width; x += step) {
