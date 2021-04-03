@@ -55,7 +55,7 @@ function main() {
         gen_points();
         redraw();
         draw_points(ctx, state.points, 'yellow');
-        for (var i = 1; i < state.num_points; i++) {
+        for (var i = 1; i < state.dum_x.length; i++) {
           add_point(state.dum_x[i]);
         }
         draw_points(ctx, state.dummies, 'orange');
@@ -66,7 +66,7 @@ function main() {
   gen_points();
   redraw();
   draw_points(ctx, state.points, 'yellow');
-  for (var i = 1; i < state.num_points; i++) {
+  for (var i = 1; i < state.dum_x.length; i++) {
     add_point(state.dum_x[i]);
   }
   draw_points(ctx, state.dummies, 'orange');
@@ -120,12 +120,19 @@ function generate_sin(ctx, num_classes, num_points, b, dum_x) {
     var y = Math.sin(x) + Math.random() * 0.22;
     x *= ((ctx.width - PADDING * 2) / 6);
     y *= ((ctx.height - PADDING * 2) / 3);
+    if(i == 0){
+      dum_x.push(x+0.1);
+      dum_x.push(x+0.1);
+    }
     if (i % 2 == 0)
       points.push([x, y]);
     else {
       dum_x.push(x);
       dum_x.push(x + .5);
-      dum_x.push(x + 1);
+      dum_x.push(x-.5);
+      dum_x.push(x + 1.1);
+      dum_x.push(x+.25);
+      dum_x.push(x+.1);
     }
   }
   return points;
@@ -144,11 +151,11 @@ function draw_points(ctx, points, col) {
     ctx.lineWidth = 3;
     //ТЕСТОВЫЕ ТОЧКИ
     if(col == "orange"){
-      ctx.beginPath();
+    /*   ctx.beginPath();
       ctx.arc(x, y, 3, 0, 2 * Math.PI);
       ctx.strokeStyle = 'blue';
       ctx.stroke();
-      ctx.closePath();
+      ctx.closePath(); */
 
       ctx.beginPath();
       ctx.moveTo(x2, y2);
