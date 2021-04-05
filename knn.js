@@ -115,8 +115,8 @@ function main() {
 
 function generate_sin(ctx, num_classes, num_points, b, dum_x) {
   var points = [];
-  for (var i = 0; i < num_points * 2; i++) {
-    var x = i * Math.PI * 1.5 / num_points;
+  for (var i = 0; i < num_points * 2.5; i++) {
+    var x = i * Math.PI * 1.5 / num_points/2;
     var y = Math.sin(x) + Math.random() * 0.22;
     x *= ((ctx.width - PADDING * 2) / 6);
     y *= ((ctx.height - PADDING * 2) / 3);
@@ -124,10 +124,10 @@ function generate_sin(ctx, num_classes, num_points, b, dum_x) {
       dum_x.push(x+0.1);
       dum_x.push(x+0.1);
     }
-    if (i % 2 == 0)
+    if (i % 2 == 0||i % 35 == 0)
       points.push([x, y]);
     else {
-      dum_x.push(x);
+      
       dum_x.push(x + .5);
       dum_x.push(x-.5);
       dum_x.push(x + 1.1);
